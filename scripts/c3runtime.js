@@ -3110,6 +3110,37 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 'use strict';{const C3=self.C3;C3.Behaviors.DragnDrop.Exps={}};
 
 
+'use strict';{const C3=self.C3;C3.Behaviors.Sin=class SinBehavior extends C3.SDKBehaviorBase{constructor(opts){super(opts)}Release(){super.Release()}}};
+
+
+'use strict';{const C3=self.C3;C3.Behaviors.Sin.Type=class SinType extends C3.SDKBehaviorTypeBase{constructor(behaviorType){super(behaviorType)}Release(){super.Release()}OnCreate(){}}};
+
+
+'use strict';{const C3=self.C3;const MOVEMENT=0;const WAVE=1;const PERIOD=2;const PERIOD_RANDOM=3;const PERIOD_OFFSET=4;const PERIOD_OFFSET_RANDOM=5;const MAGNITUDE=6;const MAGNITUDE_RANDOM=7;const ENABLE=8;const HORIZONTAL=0;const VERTICAL=1;const SIZE=2;const WIDTH=3;const HEIGHT=4;const ANGLE=5;const OPACITY=6;const VALUE=7;const FORWARDS_BACKWARDS=8;const ZELEVATION=9;const SINE=0;const TRIANGLE=1;const SAWTOOTH=2;const REVERSE_SAWTOOTH=3;const SQUARE=4;const _2pi=2*Math.PI;const _pi_2=Math.PI/
+2;const _3pi_2=3*Math.PI/2;const MOVEMENT_LOOKUP=[0,1,8,3,4,2,5,6,9,7];C3.Behaviors.Sin.Instance=class SinInstance extends C3.SDKBehaviorInstanceBase{constructor(behInst,properties){super(behInst);this._i=0;this._movement=0;this._wave=0;this._period=0;this._mag=0;this._isEnabled=true;this._basePeriod=0;this._basePeriodOffset=0;this._baseMag=0;this._periodRandom=0;this._periodOffsetRandom=0;this._magnitudeRandom=0;this._initialValue=0;this._initialValue2=0;this._lastKnownValue=0;this._lastKnownValue2=
+0;this._ratio=0;if(properties){this._movement=MOVEMENT_LOOKUP[properties[MOVEMENT]];this._wave=properties[WAVE];this._periodRandom=this._runtime.Random()*properties[PERIOD_RANDOM];this._basePeriod=properties[PERIOD];this._period=properties[PERIOD];this._period+=this._periodRandom;this._basePeriodOffset=properties[PERIOD_OFFSET];if(this._period!==0){this._periodOffsetRandom=this._runtime.Random()*properties[PERIOD_OFFSET_RANDOM];this._i=properties[PERIOD_OFFSET]/this._period*_2pi;this._i+=this._periodOffsetRandom/
+this._period*_2pi}this._magnitudeRandom=this._runtime.Random()*properties[MAGNITUDE_RANDOM];this._baseMag=properties[MAGNITUDE];this._mag=properties[MAGNITUDE];this._mag+=this._magnitudeRandom;this._isEnabled=!!properties[ENABLE]}if(this._movement===ANGLE)this._mag=C3.toRadians(this._mag);this.Init();if(this._isEnabled)this._StartTicking()}Release(){super.Release()}SaveToJson(){return{"i":this._i,"e":this._isEnabled,"mv":this._movement,"w":this._wave,"p":this._period,"mag":this._mag,"iv":this._initialValue,
+"iv2":this._initialValue2,"r":this._ratio,"lkv":this._lastKnownValue,"lkv2":this._lastKnownValue2}}LoadFromJson(o){this._i=o["i"];this._SetEnabled(o["e"]);this._movement=o["mv"];this._wave=o["w"];this._period=o["p"];this._mag=o["mag"];this._initialValue=o["iv"];this._initialValue2=o["iv2"];this._ratio=o["r"];this._lastKnownValue=o["lkv"];this._lastKnownValue2=o["lkv2"]}Init(){const wi=this._inst.GetWorldInfo();switch(this._movement){case HORIZONTAL:this._initialValue=wi.GetX();break;case VERTICAL:this._initialValue=
+wi.GetY();break;case SIZE:this._initialValue=wi.GetWidth();this._ratio=wi.GetHeight()/wi.GetWidth();break;case WIDTH:this._initialValue=wi.GetWidth();break;case HEIGHT:this._initialValue=wi.GetHeight();break;case ANGLE:this._initialValue=wi.GetAngle();break;case OPACITY:this._initialValue=wi.GetOpacity();break;case VALUE:this._initialValue=0;break;case FORWARDS_BACKWARDS:this._initialValue=wi.GetX();this._initialValue2=wi.GetY();break;case ZELEVATION:this._initialValue=wi.GetZElevation();break;default:}this._lastKnownValue=
+this._initialValue;this._lastKnownValue2=this._initialValue2}WaveFunc(x){x=x%_2pi;switch(this._wave){case SINE:return Math.sin(x);case TRIANGLE:if(x<=_pi_2)return x/_pi_2;else if(x<=_3pi_2)return 1-2*(x-_pi_2)/Math.PI;else return(x-_3pi_2)/_pi_2-1;case SAWTOOTH:return 2*x/_2pi-1;case REVERSE_SAWTOOTH:return-2*x/_2pi+1;case SQUARE:return x<Math.PI?-1:1}return 0}Tick(){const dt=this._runtime.GetDt(this._inst);if(!this._isEnabled||dt===0)return;if(this._period===0)this._i=0;else this._i=(this._i+dt/
+this._period*_2pi)%_2pi;this._UpdateFromPhase()}_UpdateFromPhase(){const wi=this._inst.GetWorldInfo();switch(this._movement){case HORIZONTAL:if(wi.GetX()!==this._lastKnownValue)this._initialValue+=wi.GetX()-this._lastKnownValue;wi.SetX(this._initialValue+this.WaveFunc(this._i)*this._mag);this._lastKnownValue=wi.GetX();break;case VERTICAL:if(wi.GetY()!==this._lastKnownValue)this._initialValue+=wi.GetY()-this._lastKnownValue;wi.SetY(this._initialValue+this.WaveFunc(this._i)*this._mag);this._lastKnownValue=
+wi.GetY();break;case SIZE:wi.SetWidth(this._initialValue+this.WaveFunc(this._i)*this._mag);wi.SetHeight(wi.GetWidth()*this._ratio);break;case WIDTH:wi.SetWidth(this._initialValue+this.WaveFunc(this._i)*this._mag);break;case HEIGHT:wi.SetHeight(this._initialValue+this.WaveFunc(this._i)*this._mag);break;case ANGLE:if(wi.GetAngle()!==this._lastKnownValue)this._initialValue=C3.clampAngle(this._initialValue+(wi.GetAngle()-this._lastKnownValue));wi.SetAngle(this._initialValue+this.WaveFunc(this._i)*this._mag);
+this._lastKnownValue=wi.GetAngle();break;case OPACITY:wi.SetOpacity(this._initialValue+this.WaveFunc(this._i)*this._mag/100);break;case FORWARDS_BACKWARDS:if(wi.GetX()!==this._lastKnownValue)this._initialValue+=wi.GetX()-this._lastKnownValue;if(wi.GetY()!==this._lastKnownValue2)this._initialValue2+=wi.GetY()-this._lastKnownValue2;wi.SetX(this._initialValue+Math.cos(wi.GetAngle())*this.WaveFunc(this._i)*this._mag);wi.SetY(this._initialValue2+Math.sin(wi.GetAngle())*this.WaveFunc(this._i)*this._mag);
+this._lastKnownValue=wi.GetX();this._lastKnownValue2=wi.GetY();break;case ZELEVATION:wi.SetZElevation(this._initialValue+this.WaveFunc(this._i)*this._mag);break}wi.SetBboxChanged()}_OnSpriteFrameChanged(prevFrame,nextFrame){}_SetEnabled(e){this._isEnabled=!!e;if(this._isEnabled)this._StartTicking();else this._StopTicking()}GetPropertyValueByIndex(index){switch(index){case MOVEMENT:return this._movement;case WAVE:return this._wave;case PERIOD:return this._basePeriod;case MAGNITUDE:return this._baseMag;
+case ENABLE:return this._isEnabled}}SetPropertyValueByIndex(index,value){switch(index){case MOVEMENT:this._movement=MOVEMENT_LOOKUP[value];this.Init();break;case WAVE:this._wave=value;break;case PERIOD:this._basePeriod=value;this._period=this._basePeriod+this._periodRandom;if(!this._isEnabled)if(this._period!==0){this._i=this._basePeriodOffset/this._period*_2pi;this._i+=this._periodOffsetRandom/this._period*_2pi}else this._i=0;break;case MAGNITUDE:this._baseMag=value;this._mag=this._baseMag+this._magnitudeRandom;
+if(this._movement===ANGLE)this._mag=C3.toRadians(this._mag);break;case ENABLE:this._isEnabled=!!value;break}}GetDebuggerProperties(){const prefix="behaviors.sin";return[{title:"$"+this.GetBehaviorType().GetName(),properties:[{name:prefix+".properties.enabled.name",value:this._isEnabled,onedit:v=>this._SetEnabled(v)},{name:prefix+".properties.period.name",value:this._period,onedit:v=>this._period=v},{name:prefix+".properties.magnitude.name",value:this._mag,onedit:v=>this._mag=v},{name:prefix+".debugger.value",
+value:this.WaveFunc(this._i)*this._mag}]}]}}};
+
+
+'use strict';{const C3=self.C3;C3.Behaviors.Sin.Cnds={IsEnabled(){return this._isEnabled},CompareMovement(m){return this._movement===m},ComparePeriod(cmp,v){return C3.compare(this._period,cmp,v)},CompareMagnitude(cmp,v){if(this._movement===5)return C3.compare(this._mag,cmp,C3.toRadians(v));else return C3.compare(this._mag,cmp,v)},CompareWave(w){return this._wave===w}}};
+
+
+'use strict';{const C3=self.C3;C3.Behaviors.Sin.Acts={SetEnabled(e){this._SetEnabled(e!==0)},SetPeriod(x){this._period=x},SetMagnitude(x){this._mag=x;if(this._movement===5)this._mag=C3.toRadians(this._mag)},SetMovement(m){if(this._movement===5&&m!==5)this._mag=C3.toDegrees(this._mag);this._movement=m;this.Init()},SetWave(w){this._wave=w},SetPhase(x){const _2pi=Math.PI*2;this._i=x*_2pi%_2pi;this._UpdateFromPhase()},UpdateInitialState(){this.Init()}}};
+
+
+'use strict';{const C3=self.C3;C3.Behaviors.Sin.Exps={CyclePosition(){return this._i/(2*Math.PI)},Period(){return this._period},Magnitude(){if(this._movement===5)return C3.toDegrees(this._mag);else return this._mag},Value(){return this.WaveFunc(this._i)*this._mag}}};
+
+
 
 {
 	const C3 = self.C3;
@@ -3128,6 +3159,7 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		C3.Behaviors.Pin,
 		C3.Behaviors.Tween,
 		C3.Behaviors.DragnDrop,
+		C3.Behaviors.Sin,
 		C3.Plugins.Arr,
 		C3.Plugins.System.Cnds.IsGroupActive,
 		C3.Plugins.Audio.Cnds.IsTagPlaying,
@@ -3229,14 +3261,14 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		C3.Plugins.System.Exps.rgbex255,
 		C3.Plugins.Sprite.Acts.SetAnimFrame,
 		C3.Plugins.Text.Acts.SetOpacity,
-		C3.Plugins.Arr.Cnds.CompareX,
-		C3.Plugins.System.Exps.choose,
-		C3.Plugins.System.Exps.int,
-		C3.Plugins.Arr.Exps.Width,
 		C3.Plugins.Button.Cnds.CompareInstanceVar,
 		C3.Plugins.Button.Cnds.IsVisible,
 		C3.Plugins.System.Acts.GoToLayoutByName,
+		C3.Plugins.Arr.Cnds.CompareX,
+		C3.Plugins.System.Exps.choose,
+		C3.Plugins.System.Exps.int,
 		C3.Plugins.System.Exps.random,
+		C3.Plugins.Arr.Exps.Width,
 		C3.Plugins.System.Acts.CreateObjectByName,
 		C3.Plugins.Arr.Acts.Delete
 		];
@@ -3302,6 +3334,8 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		{Placed: 0},
 		{DragDrop: 0},
 		{Object_card_outline: 0},
+		{Sine: 0},
+		{Arrow: 0},
 		{Hundreds_L: 0},
 		{Tens_L: 0},
 		{Unit_L: 0},
@@ -3362,6 +3396,7 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		{Unit_slot: 0},
 		{UnitCard_slot: 0},
 		{Units_bluePatch: 0},
+		{Correct: 0},
 		{White_line: 0},
 		{L1_Numbers: 0},
 		{Miner_Trolley: 0},
@@ -3705,7 +3740,6 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		{White_Demarcation2: 0},
 		{L2ImagePosition: 0},
 		{ProgressBar: 0},
-		{L0_Objects: 0},
 		{Number_Cards: 0},
 		{DragDrop2: 0},
 		{Fade2: 0},
@@ -3714,7 +3748,6 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		{NC_Hundreds: 0},
 		{NC_Tens: 0},
 		{NC_Teens: 0},
-		{L0_Slots: 0},
 		{Object_Images: 0},
 		{L0_Completed: 0},
 		{L0_PlayAgainTapped: 0},
@@ -3806,20 +3839,17 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		{L3_HintTutorialTimeSpent: 0},
 		{L3_ClueGiven: 0},
 		{L3_RewardPoints: 0},
+		{L3_PBStep: 0},
+		{L3_CurrentSet: 0},
 		{L3_ArraySet: 0},
-		{L3_CurrentNumber: 0},
+		{L3_CurrentWord: 0},
 		{L3_CorrectStreak: 0},
+		{ClueCounter: 0},
 		{L3_NumberCorrect: 0},
-		{L3_NumberIncorrect: 0},
-		{L3_NumberReplayCounter: 0},
-		{L3_NumberReplayEnabled: 0},
+		{L3_RedCounter: 0},
+		{L3_ReplayCounter: 0},
+		{L3_ReplayEnabled: 0},
 		{L3_End: 0},
-		{L3_HundredsCorrect: 0},
-		{L3_HundredsIncorrect: 0},
-		{L3_TensCorrect: 0},
-		{L3_TensIncorrect: 0},
-		{L3_OnesCorrect: 0},
-		{L3_OnesIncorrect: 0},
 		{CurrentGame: 0},
 		{CurrentLevel: 0},
 		{L4_Date: 0},
@@ -4526,17 +4556,13 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		() => "L4 Tutorial",
 		() => "Time Pause",
 		() => "Music",
-		() => "CurrentNumberCorrect",
-		() => "AQN_A_L3_1",
-		() => "AQN_A_L3_2",
-		() => "AQN_A_L3_3",
-		() => "AQN_A_L3_5",
-		() => "AQN_A_L3_6",
+		() => "IDP_A_L3_1",
+		() => "IDP_A_L3_2",
+		() => "CurrentWord1",
 		() => "AQN_A_L4_1",
 		() => "AQN_A_L4_2",
 		() => "AQN_A_L4_3",
 		() => "AQN_A_L4_5",
-		() => "111",
 		() => "Replay",
 		() => "Reward_Collection",
 		p => {
@@ -4548,153 +4574,59 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		() => "Music T L3",
 		p => {
 			const v0 = p._GetNode(0).GetVar();
-			return () => ("AQN_A_L3_1" + v0.GetValue());
+			return () => ("IDP_A_L3_1" + v0.GetValue());
 		},
 		() => 400,
 		p => {
 			const v0 = p._GetNode(0).GetVar();
-			return () => ("AQN_A_L3_2" + v0.GetValue());
+			return () => ("IDP_A_L3_2" + v0.GetValue());
 		},
-		() => 95,
-		() => 128,
-		() => 125,
-		() => 155,
-		() => 185,
-		() => 215,
-		() => 245,
-		() => 275,
-		() => 305,
-		() => 165,
-		() => 207,
-		() => 85,
-		() => 196,
-		() => 285,
-		() => 105,
-		() => 205,
-		() => 268,
-		() => 338,
-		() => 408,
-		() => 65,
+		() => 115,
+		() => 180,
+		() => 255,
+		() => 345,
+		() => 510,
+		() => 675,
+		() => 385,
 		() => "Data L3 Tutorial",
 		() => "UI L3 Tutorial",
-		() => 40,
-		() => 36,
-		() => 86,
-		() => 28,
-		() => 26,
-		() => 850,
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => ("AQN_A_L3_3" + v0.GetValue());
-		},
-		() => 491,
-		() => 459,
-		() => 247,
-		() => 614,
-		() => 465,
-		() => 168,
-		() => 711,
-		() => 750,
-		() => 140,
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => ("AQN_A_L3_5" + v0.GetValue());
-		},
-		() => 445,
-		() => 560,
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => ("AQN_A_L1_44" + v0.GetValue());
-		},
-		() => "AQN_A_L1_44",
+		() => 305,
+		() => "Green",
+		() => 185,
+		() => 435,
+		() => 515,
+		() => 550,
 		() => "MusicL3",
 		() => "PI_L3",
-		p => {
-			const v0 = p._GetNode(0).GetVar();
-			return () => ("AQN_A_L3_6" + v0.GetValue());
-		},
-		() => 4.5,
+		() => 2.5,
 		() => "L3_SaveState",
 		() => "Data L3",
 		() => "UI L3",
 		() => "L3_Save",
-		() => "Number Replay Counter L3",
-		() => "ArrayL3_Number",
-		() => 84,
-		() => 270,
-		() => 990,
-		() => 758,
-		() => 999,
-		() => 229,
-		() => 391,
-		() => 489,
-		() => 111,
-		() => 492,
-		() => 570,
-		() => 648,
-		() => 863,
-		() => 209,
-		() => 236,
-		() => 263,
-		() => 290,
-		() => 317,
-		() => 344,
-		() => 371,
-		() => 398,
-		() => 425,
-		() => 197,
-		() => 261,
-		() => 293,
-		() => 325,
-		() => 357,
-		() => 389,
-		() => 421,
-		() => "12",
-		() => "19",
-		() => "21",
-		() => "39",
-		() => "84",
-		() => "130",
-		() => "229",
-		() => "270",
-		() => "391",
-		() => "489",
-		() => "492",
-		() => "570",
-		() => "648",
-		() => "758",
-		() => "863",
-		() => "990",
-		() => "999",
-		p => {
-			const f0 = p._GetNode(0).GetBoundMethod();
-			return () => f0(39, 21, 84, 130, 270, 990, 758, 999, 12, 229, 391, 489, 111, 19, 492, 570, 648, 863);
-		},
-		() => "Set Shelf",
-		() => "Drag Settings",
-		() => "Card Creator",
-		() => 35,
-		() => 46,
-		() => 34,
-		() => 68,
-		() => 97,
-		() => 616,
-		() => 482,
-		() => "Number Checker L3",
-		p => {
-			const f0 = p._GetNode(0).GetBoundMethod();
-			const v1 = p._GetNode(1).GetVar();
-			return () => f0(v1.GetValue());
-		},
-		p => {
-			const n0 = p._GetNode(0);
-			const n1 = p._GetNode(1);
-			const n2 = p._GetNode(2);
-			return () => (((9 - n0.ExpObject()) + ((9 - n1.ExpObject()) * 10)) + ((9 - n2.ExpObject()) * 100));
-		},
-		() => 0.7,
+		() => "Replay Counter L3",
 		() => "Clue L3",
+		() => 375,
+		() => 210,
+		() => 355,
+		() => 705,
+		() => "Sets L3",
+		() => "Bed_",
+		() => "Sock_",
+		() => "Helicopter_",
+		() => "Glue_",
+		() => "Train_",
+		() => "Jeans_",
+		() => "Monkey_",
+		() => "Fish_",
+		() => "Set Settings L3",
+		() => "Red",
 		() => "End L3",
+		p => {
+			const v0 = p._GetNode(0).GetVar();
+			const v1 = p._GetNode(1).GetVar();
+			const v2 = p._GetNode(2).GetVar();
+			return () => and((and((and("Set ", v0.GetValue()) + " PB "), v1.GetValue()) + " CS "), v2.GetValue());
+		},
 		() => "MusicL4",
 		() => "PI_L4",
 		() => "L4_SaveState",
@@ -4727,7 +4659,12 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		() => 370,
 		() => 397,
 		() => 424,
+		() => 209,
+		() => 236,
+		() => 263,
+		() => 290,
 		() => 164,
+		() => 196,
 		() => 228,
 		() => 292,
 		() => 324,
@@ -4747,6 +4684,7 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		() => "348",
 		() => "710",
 		() => "190",
+		() => "39",
 		() => "654",
 		() => "561",
 		() => "220",
@@ -4755,6 +4693,7 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 			return () => f0(213, 54, 11, 230, 960, 520, 118, 493, 833, 82, 422, 348, 710, 190, 39, 654, 561, 220);
 		},
 		() => "Set Shelf L4",
+		() => 85,
 		() => 280,
 		() => 117,
 		() => 149,
@@ -4765,8 +4704,15 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		() => 200,
 		() => 120,
 		() => 320,
+		() => 140,
 		() => 330,
+		() => 408,
 		() => 392,
+		() => 40,
+		() => 36,
+		() => 86,
+		() => 28,
+		() => 26,
 		() => "Drag Settings L4",
 		() => "Blocks",
 		() => 784,
@@ -4820,6 +4766,10 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		() => 90,
 		() => 80,
 		() => 600,
+		() => 35,
+		() => 46,
+		() => 34,
+		() => 68,
 		p => {
 			const f0 = p._GetNode(0).GetBoundMethod();
 			const f1 = p._GetNode(1).GetBoundMethod();
@@ -4832,8 +4782,36 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 			return () => and(n0.ExpObject(v1.GetValue()), "_numberCards");
 		},
 		() => "Number Checker L4",
+		p => {
+			const f0 = p._GetNode(0).GetBoundMethod();
+			const v1 = p._GetNode(1).GetVar();
+			return () => f0(v1.GetValue());
+		},
+		p => {
+			const n0 = p._GetNode(0);
+			const n1 = p._GetNode(1);
+			const n2 = p._GetNode(2);
+			return () => (((9 - n0.ExpObject()) + ((9 - n1.ExpObject()) * 10)) + ((9 - n2.ExpObject()) * 100));
+		},
 		() => "AQN_A_L4_6",
+		() => 0.7,
+		() => "CurrentNumberCorrect",
+		() => "AQN_A_L3_6",
 		() => "Clue L4",
+		() => 425,
+		() => 398,
+		() => 371,
+		() => 344,
+		() => 317,
+		() => 421,
+		() => 389,
+		() => 357,
+		() => 325,
+		() => 293,
+		() => 261,
+		() => 229,
+		() => 197,
+		() => 165,
 		() => "End L4",
 		() => "GameCompletionSound",
 		p => {
@@ -4865,8 +4843,11 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		() => "60_numberCards",
 		() => "5_numberCards",
 		() => "10_numberCards",
+		() => "111",
 		() => "UI L4 Tutorial",
+		() => "AQN_A_L1_44",
 		() => "Data L4 Tutorial",
+		() => 850,
 		p => {
 			const v0 = p._GetNode(0).GetVar();
 			return () => ("AQN_A_L4_3" + v0.GetValue());
@@ -4876,9 +4857,16 @@ newY);wi.SetBboxChanged()}}else if(this._axes===1){if(wi.GetX()!==newX){wi.SetX(
 		() => 451,
 		() => 429,
 		() => 457,
+		() => 750,
 		p => {
 			const v0 = p._GetNode(0).GetVar();
 			return () => ("AQN_A_L4_5" + v0.GetValue());
+		},
+		() => 445,
+		() => 560,
+		p => {
+			const v0 = p._GetNode(0).GetVar();
+			return () => ("AQN_A_L1_44" + v0.GetValue());
 		}
 	];
 }
